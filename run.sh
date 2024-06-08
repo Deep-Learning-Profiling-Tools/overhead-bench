@@ -16,7 +16,7 @@ do
         time nsys profile python "$script" "$mode"
       elif [ "$profiler" == "proton" ]
       then
-        if [ "script" == "bench_triton.py" ]
+        if [ "$script" == "bench_triton.py" ]
         then
           time proton -k triton "$script" "$mode"
         else
