@@ -10,15 +10,13 @@ def run(nelems, iters):
     tensor_a = torch.randn(nelems, dtype=torch.float32, device=device)
     tensor_b = torch.randn(nelems, dtype=torch.float32, device=device)
 
-    result_gpu = torch.empty_like(tensor_a)
-
     # warmup
-    result_gpu.copy_(tensor_a + tensor_b, non_blocking=True)
+    _ = tensor_a + tensor_b
 
     start_time = time.time()
     # measure
     for _ in range(iters):
-        result_gpu.copy_(tensor_a + tensor_b, non_blocking=True)
+        _ = tensor_a + tensor_b
     end_time = time.time()
 
     print("cpu time", end_time - start_time)
