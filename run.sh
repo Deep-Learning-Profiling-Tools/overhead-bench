@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROFILERS=("nsys" "proton")
+PROFILERS=("nsys profile" "proton")
 MODES=("cpu_bound" "gpu_bound")
 SCRIPTS=("bench_torch.py" "bench_triton.py")
 
@@ -10,8 +10,8 @@ do
 		do
 				for script in "${SCRIPTS[@]}"
 				do
-						echo "Running $profiler $mode $script"
-						./"$profiler" "$mode" "$script"
+						echo "Running $profiler $script $mode"
+						$profiler "$script" "$mode" 
 				done
 		done
 done
