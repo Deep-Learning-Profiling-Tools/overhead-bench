@@ -2,7 +2,7 @@
 
 PROFILERS=("nsys profile" "proton")
 MODES=("cpu_bound" "gpu_bound")
-SCRIPTS=("bench_torch.py" "bench_triton.py")
+SCRIPTS=("bench_torch.py" "python bench_triton.py")
 
 for profiler in "${PROFILERS[@]}"
 do
