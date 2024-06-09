@@ -13,14 +13,14 @@ do
       echo "Running $profiler-$kernel-$workload"
       if [ "$profiler" == "nsys" ];
       then
-        time nsys profile python microbench.py --workload "$workload"
+        time nsys profile python microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
       elif [ "$profiler" == "proton" ];
       then
         if [ "$kernel" == "triton" ]
         then
-          time proton -k triton microbench.py --workload "$workload"
+          time proton -k triton microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
         else
-          time proton microbench.py --workload "$workload"
+          time proton microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
         fi
       fi
     done
