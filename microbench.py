@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("--workload", type=str,
                         choices=["cpu_bound", "gpu_bound"], required=True)
     parser.add_argument("--profiler", type=str,
-                        choices=["nsys", "proton", "kineto"], required=True)
+                        choices=["nsys", "proton", "kineto", "none"], default="none")
     args = parser.parse_args()
     if args.workload == "cpu_bound":
         run(nelems=BLOCK_SIZE, iters=100000, kernel=args.kernel)
