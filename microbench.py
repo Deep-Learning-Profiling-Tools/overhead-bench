@@ -8,7 +8,7 @@ BLOCK_SIZE = 1024
 
 
 @triton.jit
-def add(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
+def triton_add(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
     pid = tl.program_id(0)
     offs = tl.arange(0, BLOCK_SIZE)
     a = tl.load(a_ptr + pid * BLOCK_SIZE + offs)
@@ -28,8 +28,8 @@ def run(nelems, iters, kernel):
 
     def add():
         if kernel == "triton":
-            add[(nelems // BLOCK_SIZE, )](tensor_a,
-                                          tensor_b, result_gpu, BLOCK_SIZE)
+            triton_add[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
+                                                 result_gpu, BLOCK_SIZE)
         elif kernel == "torch":
             _ = tensor_a + tensor_b
 
