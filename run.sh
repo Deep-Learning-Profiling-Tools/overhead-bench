@@ -10,19 +10,20 @@ do
   do
     for kernel in "${KERNELS[@]}"
     do
-      echo "Running $profiler-$kernel-$workload"
       if [ "$profiler" == "nsys" ];
       then
-        time nsys profile python microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
+        cmd="time nsys profile python microbench.py --workload $workload --profiler $profiler --kernel $kernel"
       elif [ "$profiler" == "proton" ];
       then
         if [ "$kernel" == "triton" ]
         then
-          time proton -k triton microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
+          cmd="time proton -k triton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
         else
-          time proton microbench.py --workload "$workload" --profiler "$profiler" --kernel "$kernel"
+          cmd="time proton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
         fi
       fi
+      echo "$cmd"
+      eval "$cmd"
     done
   done
 done
