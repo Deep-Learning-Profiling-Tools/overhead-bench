@@ -42,7 +42,7 @@ def run(nelems, iters, kernel):
         add()
     end_time = time.time()
 
-    print("cpu time", end_time - start_time)
+    print("cpu time:", end_time - start_time)
 
     torch.cuda.synchronize()
 
