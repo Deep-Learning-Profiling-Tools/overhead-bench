@@ -1,26 +1,26 @@
 #!/bin/bash
 
 PROFILERS=("nsys" "proton")
-MODES=("cpu_bound" "gpu_bound")
-SCRIPTS=("bench_torch.py" "bench_triton.py")
+WORKLOADS=("cpu_bound" "gpu_bound")
+KERNELS=("torch" "triton")
 
 for profiler in "${PROFILERS[@]}"
 do
-  for mode in "${MODES[@]}"
+  for workload in "${WORKLOADS[@]}"
   do
-    for script in "${SCRIPTS[@]}"
+    for kernel in "${KERNELS[@]}"
     do
-      echo "Running $profiler $script $mode"
-      if [ "$profiler" == "nsys" ]
+      echo "Running $profiler-$kernel-$workload"
+      if [ "$profiler" == "nsys" ];
       then
-        time nsys profile python "$script" "$mode"
-      elif [ "$profiler" == "proton" ]
+        time nsys profile python microbench.py --workload "$workload"
+      elif [ "$profiler" == "proton" ];
       then
-        if [ "$script" == "bench_triton.py" ]
+        if [ "$kernel" == "triton" ]
         then
-          time proton -k triton "$script" "$mode"
+          time proton -k triton microbench.py --workload "$workload"
         else
-          time proton "$script" "$mode"
+          time proton microbench.py --workload "$workload"
         fi
       fi
     done
