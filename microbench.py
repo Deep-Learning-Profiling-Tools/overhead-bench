@@ -24,13 +24,13 @@ def run(nelems, iters, kernel):
     tensor_a = torch.randn(nelems, dtype=torch.float32, device=device)
     tensor_b = torch.randn(nelems, dtype=torch.float32, device=device)
 
-    result_gpu = torch.empty_like(tensor_a)
-
     def add():
         if kernel == "triton":
+            result_gpu = torch.empty_like(tensor_a)
             triton_add[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
                                                  result_gpu, BLOCK_SIZE)
         elif kernel == "torch":
+            result_gpu = torch.empty_like(tensor_a)
             torch.add(tensor_a, tensor_b, out=result_gpu)
 
     # warmup
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     if args.workload == "cpu_bound":
         run(nelems=BLOCK_SIZE, iters=100000, kernel=args.kernel)
     elif args.workload == "gpu_bound":
-        run(nelems=BLOCK_SIZE*100000, iters=1000, kernel=args.kernel)
+        run(nelems=BLOCK_SIZE*1000000, iters=1000, kernel=args.kernel)
