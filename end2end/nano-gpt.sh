@@ -3,7 +3,7 @@
 cd nanoGPT || exit
 python data/shakespeare_char/prepare.py
 
-PROFILERS=("nsys" "proton")
+PROFILERS=("proton")
 WORKLOADS=("train" "sample")
 KERNELS=("torch" "triton")
 
@@ -46,3 +46,5 @@ do
   done
 done
 
+rm -rf *.nsys-rep
+rm -rf *.hatchet
