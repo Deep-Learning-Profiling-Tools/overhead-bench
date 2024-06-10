@@ -31,7 +31,7 @@ def run(nelems, iters, kernel):
             triton_add[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
                                                  result_gpu, BLOCK_SIZE)
         elif kernel == "torch":
-            _ = tensor_a + tensor_b
+            torch.add(tensor_a, tensor_b, out=result_gpu)
 
     # warmup
     add()
@@ -42,9 +42,9 @@ def run(nelems, iters, kernel):
         add()
     end_time = time.time()
 
-    print("cpu time:", end_time - start_time)
-
     torch.cuda.synchronize()
+
+    print("cpu time:", end_time - start_time)
 
 
 if __name__ == "__main__":
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     if args.workload == "cpu_bound":
         run(nelems=BLOCK_SIZE, iters=100000, kernel=args.kernel)
     elif args.workload == "gpu_bound":
-        run(nelems=BLOCK_SIZE*100000, iters=10000, kernel=args.kernel)
+        run(nelems=BLOCK_SIZE*100000, iters=1000, kernel=args.kernel)
