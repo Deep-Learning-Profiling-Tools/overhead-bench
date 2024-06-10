@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd nanoGPT
+cd nanoGPT || exit
 python data/shakespeare_char/prepare.py
 
 PROFILERS=("nsys" "proton")
@@ -13,23 +13,33 @@ do
   do
     for kernel in "${KERNELS[@]}"
     do
-      if [ "$profiler" == "nsys" ];
-      then
-        if [ "$workload" == "train" ]
-          cmd="time nsys profile python train.py config/train_shakespeare_char.py --max_iters=1000"
-        then
-          cmd="time python sample.py --out_dir=out-shakespeare-char"
-        else
-        fi
-      elif [ "$profiler" == "proton" ];
-      then
-        if [ "$kernel" == "triton" ]
-        then
-          cmd="time proton -k triton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
-        else
-          cmd="time proton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
+      profiler_cmd=""
+      workload_cmd=""
+      kernel_cmd=""
+      
+      if [ "$profiler" == "nsys" ]; then
+        profiler_cmd="time nsys profile python"
+      elif [ "$profiler" == "proton" ]; then
+        if [ "$kernel" == "torch" ]; then
+          profiler_cmd="time proton"  
+        elif [ "$kernel" == "triton" ]; then
+          profiler_cmd="time proton -k triton"
         fi
       fi
+
+      if [ "$workload" == "train" ]; then
+        workload_cmd="train.py config/train_shakespeare_char.py --max_iters=1000"
+      elif [ "$workload" == "sample" ]; then
+        workload_cmd="sample.py --out_dir=out-shakespeare-char"
+      fi
+
+      if [ "$kernel" == "torch" ]; then
+        kernel_cmd="--compile=False"
+      elif [ "$kernel" == "triton" ]; then
+        kernel_cmd="--compile=True"
+      fi
+
+      cmd="$profiler_cmd main.py $workload_cmd $kernel_cmd"
       echo "$cmd"
       eval "$cmd"
     done
