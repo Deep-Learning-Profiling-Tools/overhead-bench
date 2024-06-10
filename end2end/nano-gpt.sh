@@ -40,9 +40,13 @@ do
       fi
 
       cmd="$profiler_cmd $workload_cmd $kernel_cmd"
+      echo "-------------------------------------------"
       echo "$cmd"
+      echo "-------------------------------------------"
       eval "$cmd"
     done
   done
 done
 
+rm -rf *.nsys-rep
+rm -rf *.hatchet
