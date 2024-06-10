@@ -1,0 +1,3 @@
+[submodule "end2end/nanoGPT"]
+	path = end2end/nanoGPT
+	url = https://github.com/karpathy/nanoGPT.git
