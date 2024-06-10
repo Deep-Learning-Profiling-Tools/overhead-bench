@@ -3,7 +3,7 @@
 cd nanoGPT || exit
 python data/shakespeare_char/prepare.py
 
-PROFILERS=("proton")
+PROFILERS=("nsys" "proton")
 WORKLOADS=("train" "sample")
 KERNELS=("torch" "triton")
 
@@ -40,7 +40,9 @@ do
       fi
 
       cmd="$profiler_cmd $workload_cmd $kernel_cmd"
+      echo "-------------------------------------------"
       echo "$cmd"
+      echo "-------------------------------------------"
       eval "$cmd"
     done
   done
