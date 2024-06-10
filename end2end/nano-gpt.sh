@@ -39,7 +39,7 @@ do
         kernel_cmd="--compile=True"
       fi
 
-      cmd="$profiler_cmd main.py $workload_cmd $kernel_cmd"
+      cmd="$profiler_cmd $workload_cmd $kernel_cmd"
       echo "$cmd"
       eval "$cmd"
     done
