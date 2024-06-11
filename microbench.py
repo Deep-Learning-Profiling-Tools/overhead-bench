@@ -43,15 +43,16 @@ def run(nelems, iters, kernel, workload):
             result_gpu = torch.empty_like(tensor_a)
             if workload == "cpu_bound":
                 triton_add[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
-                        result_gpu, BLOCK_SIZE)
+                                                     result_gpu, BLOCK_SIZE)
             else:
                 triton_dot[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
-                        result_gpu, BLOCK_SIZE)
+                                                     result_gpu, BLOCK_SIZE)
         elif kernel == "torch":
             if workload == "cpu_bound":
                 result_gpu = tensor_a + tensor_b
             else:
-                result_gpu = torch.matmul(tensor_a[:,None],tensor_b[None,:]).sum(dim=1)
+                result_gpu = torch.matmul(
+                    tensor_a[:, None], tensor_b[None, :]).sum(dim=1)
 
     # warmup
     add()
@@ -70,15 +71,15 @@ def run(nelems, iters, kernel, workload):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--kernel", type=str,
-            choices=["torch", "triton"], required=True)
+                        choices=["torch", "triton"], required=True)
     parser.add_argument("--workload", type=str,
-            choices=["cpu_bound", "gpu_bound"], required=True)
+                        choices=["cpu_bound", "gpu_bound"], required=True)
     parser.add_argument("--profiler", type=str,
-            choices=["nsys", "proton", "kineto", "none"], default="none")
+                        choices=["nsys", "proton", "kineto", "none"], default="none")
     args = parser.parse_args()
     if args.workload == "cpu_bound":
         run(nelems=BLOCK_SIZE, iters=100000,
-                kernel=args.kernel, workload=args.workload)
+            kernel=args.kernel, workload=args.workload)
     elif args.workload == "gpu_bound":
         run(nelems=BLOCK_SIZE*100, iters=1000,
-                kernel=args.kernel, workload=args.workload)
+            kernel=args.kernel, workload=args.workload)
