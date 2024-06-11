@@ -13,8 +13,8 @@ def triton_dot(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
     offs = tl.arange(0, BLOCK_SIZE)
     a = tl.load(a_ptr + pid * BLOCK_SIZE + offs)
     b = tl.load(b_ptr + pid * BLOCK_SIZE + offs)
-    a = tl.broadcast(a[:, None], [BLOCK_SIZE, BLOCK_SIZE])
-    b = tl.broadcast(b[None, :], [BLOCK_SIZE, BLOCK_SIZE])
+    a = tl.broadcast(a[:, None], (BLOCK_SIZE, BLOCK_SIZE))
+    b = tl.broadcast(b[None, :], (BLOCK_SIZE, BLOCK_SIZE))
     c = tl.sum(tl.dot(a, b), axis=1)
     tl.store(c_ptr + pid * BLOCK_SIZE + offs, c)
 
