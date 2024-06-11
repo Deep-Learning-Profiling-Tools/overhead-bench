@@ -79,5 +79,5 @@ if __name__ == "__main__":
         run(nelems=BLOCK_SIZE, iters=100000,
             kernel=args.kernel, workload=args.workload)
     elif args.workload == "gpu_bound":
-        run(nelems=BLOCK_SIZE, iters=100000,
+        run(nelems=BLOCK_SIZE*10, iters=100,
             kernel=args.kernel, workload=args.workload)
