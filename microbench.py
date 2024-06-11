@@ -19,7 +19,17 @@ def triton_dot(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
     tl.store(c_ptr + pid * BLOCK_SIZE + offs, c)
 
 
-def run(nelems, iters, kernel):
+@triton.jit
+def triton_add(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
+    pid = tl.program_id(0)
+    offs = tl.arange(0, BLOCK_SIZE)
+    a = tl.load(a_ptr + pid * BLOCK_SIZE + offs)
+    b = tl.load(b_ptr + pid * BLOCK_SIZE + offs)
+    c = a + b
+    tl.store(c_ptr + pid * BLOCK_SIZE + offs, c)
+
+
+def run(nelems, iters, kernel, workload):
     # Check if CUDA is available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -29,11 +39,18 @@ def run(nelems, iters, kernel):
     def add():
         if kernel == "triton":
             result_gpu = torch.empty_like(tensor_a)
-            triton_dot[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
-                                                 result_gpu, BLOCK_SIZE)
+            if workload == "cpu_bound":
+                triton_add[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
+                                                     result_gpu, BLOCK_SIZE)
+            else:
+                triton_dot[(nelems // BLOCK_SIZE, )](tensor_a, tensor_b,
+                                                     result_gpu, BLOCK_SIZE)
         elif kernel == "torch":
-            result_gpu = torch.empty_like(tensor_a)
-            torch.matmul(tensor_a[:, None], tensor_b[None, :], out=result_gpu)
+            if workload == "cpu_bound":
+                result_gpu = tensor_a + tensor_b
+            else:
+                result_gpu = torch.matmul(
+                    tensor_a[:, None], tensor_b[None, :]).sum(dim=1)
 
     # warmup
     add()
@@ -59,6 +76,8 @@ if __name__ == "__main__":
                         choices=["nsys", "proton", "kineto", "none"], default="none")
     args = parser.parse_args()
     if args.workload == "cpu_bound":
-        run(nelems=BLOCK_SIZE, iters=100000, kernel=args.kernel)
+        run(nelems=BLOCK_SIZE, iters=100000,
+            kernel=args.kernel, workload=args.workload)
     elif args.workload == "gpu_bound":
-        run(nelems=BLOCK_SIZE*1000, iters=1000, kernel=args.kernel)
+        run(nelems=BLOCK_SIZE, iters=100000,
+            kernel=args.kernel, workload=args.workload)
