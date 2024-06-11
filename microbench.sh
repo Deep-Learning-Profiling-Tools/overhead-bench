@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROFILERS=("nsys" "proton")
+PROFILERS=("none" "nsys" "proton")
 WORKLOADS=("cpu_bound" "gpu_bound")
 KERNELS=("torch" "triton")
 
