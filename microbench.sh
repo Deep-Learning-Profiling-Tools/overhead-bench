@@ -17,7 +17,9 @@ do
       then
         if [ "$kernel" == "triton" ]
         then
-          cmd="time proton -k triton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
+          # combine workload and kernel into a single argument
+          profile_name="$workload-$kernel"
+          cmd="time proton -k triton -n $profile_name microbench.py --workload $workload --profiler $profiler --kernel $kernel"
         else
           cmd="time proton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
         fi
