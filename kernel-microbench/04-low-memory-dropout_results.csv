@@ -1,0 +1,6 @@
+run,script,baseline,proton,torch,nsys
+1,04-low-memory-dropout.py,5.57,5.66,5.56,8.91
+2,04-low-memory-dropout.py,6.37,5.80,5.53,8.50
+3,04-low-memory-dropout.py,5.57,5.50,5.52,6.64
+4,04-low-memory-dropout.py,5.49,5.96,5.93,7.30
+5,04-low-memory-dropout.py,5.45,5.52,5.57,6.98

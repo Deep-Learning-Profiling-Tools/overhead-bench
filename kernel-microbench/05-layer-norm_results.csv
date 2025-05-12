@@ -1,0 +1,6 @@
+run,script,baseline,proton,torch,nsys
+1,05-layer-norm.py,6.56,6.38,6.05,7.08
+2,05-layer-norm.py,6.68,7.17,6.03,7.13
+3,05-layer-norm.py,6.14,6.64,6.27,6.69
+4,05-layer-norm.py,6.13,6.54,6.49,6.50
+5,05-layer-norm.py,7.40,6.06,6.12,6.94

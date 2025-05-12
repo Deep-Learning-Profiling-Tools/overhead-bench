@@ -39,7 +39,7 @@ def format_dataset(dataset, tokenizer):
 
 
     
-def train_unsloth():
+def train_unsloth(args):
     from unsloth import FastLanguageModel
     from trl import SFTTrainer
     from transformers import TrainingArguments
@@ -53,10 +53,11 @@ def train_unsloth():
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
+        cache_dir = "/scratch/jlee436/unsloth/model",
         # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
     )
 
-    dataset = load_dataset("yahma/alpaca-cleaned", split = "train")
+    dataset = load_dataset("yahma/alpaca-cleaned", split = "train", cache_dir="/scratch/jlee436/unsloth/data")
     dataset = format_dataset(dataset, tokenizer)
 
     
@@ -93,7 +94,6 @@ def train_unsloth():
             learning_rate = 2e-4,
             fp16 = not SUPPORTS_BFLOAT16,
             bf16 = SUPPORTS_BFLOAT16,
-            logging_steps = 1,
             optim = "adamw_8bit",
             weight_decay = 0.01,
             lr_scheduler_type = "linear",
@@ -103,28 +103,15 @@ def train_unsloth():
         ),
     )
 
-    # @title Show current memory stats
-    gpu_stats = torch.cuda.get_device_properties(0)
-    start_gpu_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
-    max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
-    print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
-    print(f"{start_gpu_memory} GB of memory reserved.")
-
-    trainer_stats = trainer.train()
-
-    # @title Show final memory and time stats
-    used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
-    used_memory_for_lora = round(used_memory - start_gpu_memory, 3)
-    used_percentage = round(used_memory / max_memory * 100, 3)
-    lora_percentage = round(used_memory_for_lora / max_memory * 100, 3)
-    print(f"{trainer_stats.metrics['train_runtime']} seconds used for training.")
-    print(
-        f"{round(trainer_stats.metrics['train_runtime']/60, 2)} minutes used for training."
-    )
-    print(f"Peak reserved memory = {used_memory} GB.")
-    print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
-    print(f"Peak reserved memory % of max memory = {used_percentage} %.")
-    print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
+    if args.profiling == "proton":
+        session_id = proton.start(name="profile_name", context="shadow")
+        trainer_stats = trainer.train()
+        proton.finalize(session_id)
+    elif args.profiling == "torch":
+        with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
+            trainer_stats = trainer.train()
+    else:
+        trainer_stats = trainer.train()
 
 
 def train_native():
@@ -195,38 +182,16 @@ def train_native():
         ),
     )
 
-    # @title Show current memory stats
-    gpu_stats = torch.cuda.get_device_properties(0)
-    start_gpu_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
-    max_memory = round(gpu_stats.total_memory / 1024 / 1024 / 1024, 3)
-    print(f"GPU = {gpu_stats.name}. Max memory = {max_memory} GB.")
-    print(f"{start_gpu_memory} GB of memory reserved.")
-
-    trainer_stats = trainer.train()
-
-    # @title Show final memory and time stats
-    used_memory = round(torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024, 3)
-    used_memory_for_lora = round(used_memory - start_gpu_memory, 3)
-    used_percentage = round(used_memory / max_memory * 100, 3)
-    lora_percentage = round(used_memory_for_lora / max_memory * 100, 3)
-    print(f"{trainer_stats.metrics['train_runtime']} seconds used for training.")
-    print(
-        f"{round(trainer_stats.metrics['train_runtime']/60, 2)} minutes used for training."
-    )
-    print(f"Peak reserved memory = {used_memory} GB.")
-    print(f"Peak reserved memory for training = {used_memory_for_lora} GB.")
-    print(f"Peak reserved memory % of max memory = {used_percentage} %.")
-    print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
-
 
 if __name__ == "__main__":
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, default="unsloth")
+    parser.add_argument("--profiling", type=str, default="none")
     args = parser.parse_args()
 
     # use args.model to determine which model to train
     if args.model == "unsloth":
-        train_unsloth()
+        train_unsloth(args)
     elif args.model == "native":
         train_native()

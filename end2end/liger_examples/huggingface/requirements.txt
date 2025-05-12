@@ -1,0 +1,6 @@
+transformers==4.45.2
+trl
+liger-kernel
+triton
+torch
+torchvision
