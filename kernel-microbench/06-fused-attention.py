@@ -663,7 +663,7 @@ def simple_benchmark():
                     H = N_HEADS
                     BATCH_ = BATCH
                     HEAD_DIM_ = HEAD_DIM
-                    for _ in range(2):  # Run a few iterations for each config
+                    for _ in range(5):  # Run a few iterations for each config
                         dtype = torch.float16
                         if "triton" in provider:
                             q = torch.randn((BATCH_, H, N_CTX, HEAD_DIM_), dtype=dtype, device="cuda", requires_grad=True)

@@ -377,36 +377,37 @@ def simple_benchmark():
     eps = 1e-5
     device = 'cuda'
     for N in Ns:
-        x_shape = (M, N)
-        w_shape = (N,)
-        weight = torch.rand(w_shape, dtype=dtype, device=device, requires_grad=True)
-        bias = torch.rand(w_shape, dtype=dtype, device=device, requires_grad=True)
-        x = -2.3 + 0.5 * torch.randn(x_shape, dtype=dtype, device=device)
-        dy = .1 * torch.randn_like(x)
-        x.requires_grad_(True)
         for provider in providers:
             # Forward pass
-            with proton.scope(f"forward [provider={provider}, N={N}]"):
-                if provider == "triton":
-                    y = layer_norm(x, w_shape, weight, bias, eps)
-                elif provider == "torch":
-                    y = torch.nn.functional.layer_norm(x, w_shape, weight, bias, eps)
-                elif provider == "apex":
-                    apex_layer_norm = (apex.normalization.FusedLayerNorm(w_shape).to(x.device).to(x.dtype))
-                    y = apex_layer_norm(x)
-                else:
-                    continue
-            # Backward pass
-            with proton.scope(f"backward [provider={provider}, N={N}]"):
-                if provider in ["triton", "torch", "apex"]:
-                    y.backward(dy, retain_graph=True)
-                # Clear grads for next iteration
-                if x.grad is not None:
-                    x.grad.zero_()
-                if weight.grad is not None:
-                    weight.grad.zero_()
-                if bias.grad is not None:
-                    bias.grad.zero_()
+            for _ in range(10):
+                x_shape = (M, N)
+                w_shape = (N,)
+                weight = torch.rand(w_shape, dtype=dtype, device=device, requires_grad=True)
+                bias = torch.rand(w_shape, dtype=dtype, device=device, requires_grad=True)
+                x = -2.3 + 0.5 * torch.randn(x_shape, dtype=dtype, device=device)
+                dy = .1 * torch.randn_like(x)
+                x.requires_grad_(True)
+                with proton.scope(f"forward [provider={provider}, N={N}]"):
+                    if provider == "triton":
+                        y = layer_norm(x, w_shape, weight, bias, eps)
+                    elif provider == "torch":
+                        y = torch.nn.functional.layer_norm(x, w_shape, weight, bias, eps)
+                    elif provider == "apex":
+                        apex_layer_norm = (apex.normalization.FusedLayerNorm(w_shape).to(x.device).to(x.dtype))
+                        y = apex_layer_norm(x)
+                    else:
+                        continue    
+                # Backward pass
+                with proton.scope(f"backward [provider={provider}, N={N}]"):
+                    if provider in ["triton", "torch", "apex"]:
+                        y.backward(dy, retain_graph=True)
+                    # Clear grads for next iteration
+                    if x.grad is not None:
+                        x.grad.zero_()
+                    if weight.grad is not None:
+                        weight.grad.zero_()
+                    if bias.grad is not None:
+                        bias.grad.zero_()
 
 
 def main():

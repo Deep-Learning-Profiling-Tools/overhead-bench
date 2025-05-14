@@ -2,9 +2,10 @@ from dataclasses import dataclass
 
 import datasets
 import torch
+from torch import bfloat16
 import transformers
 
-from callback import EfficiencyCallback
+# from callback import EfficiencyCallback
 from trl import DataCollatorForCompletionOnlyLM
 from trl import SFTTrainer
 
@@ -17,6 +18,7 @@ class CustomArguments:
     dataset: str = "tatsu-lab/alpaca"
     max_seq_length: int = 512
     use_liger: bool = False
+    profile_torch: bool = False
 
 
 def formatting_prompts_func(example):
@@ -28,6 +30,8 @@ def train():
     training_args, custom_args = parser.parse_args_into_dataclasses()
     training_args.use_liger_kernel = custom_args.use_liger
     training_args.max_seq_length = custom_args.max_seq_length
+    training_args.max_steps = 100
+
     print(training_args)
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         custom_args.model_name,
@@ -52,7 +56,7 @@ def train():
             custom_args.model_name,
             trust_remote_code=True,
             use_cache=False,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=bfloat16,
             cache_dir="/scratch/jlee436/liger/model",
             # These args will get passed to the appropriate apply_liger_kernel_to_* function
             # to override the default settings
@@ -64,7 +68,7 @@ def train():
             custom_args.model_name,
             trust_remote_code=True,
             use_cache=False,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=bfloat16,
             cache_dir="/scratch/jlee436/liger/model",
         )
 

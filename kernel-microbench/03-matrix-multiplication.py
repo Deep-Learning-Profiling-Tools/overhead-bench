@@ -362,13 +362,13 @@ def simple_benchmark():
         for provider in providers:
             for size in sizes:
                 M = N = K = size
-                for _ in range(1):  # Run a few iterations for each config
+                for _ in range(5):  # Run a few iterations for each config
                     a = torch.randn((M, K), device='cuda', dtype=torch.float16)
                     b = torch.randn((K, N), device='cuda', dtype=torch.float16)
-                    if TORCH_HAS_FP8 and fp8_inputs:
-                        a = a.to(torch.float8_e5m2)
-                        b = b.T
-                        b = b.to(torch.float8_e5m2)
+                    # if TORCH_HAS_FP8 and fp8_inputs:
+                    #     a = a.to(torch.float8_e5m2)
+                    #     b = b.T
+                    #     b = b.to(torch.float8_e5m2)
                     if provider == ref_lib.lower():
                         torch.matmul(a, b)
                     elif provider == 'triton':

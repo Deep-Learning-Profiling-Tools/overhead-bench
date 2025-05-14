@@ -286,12 +286,12 @@ def benchmark(N, provider):
 
 def simple_benchmark():
     # Use the same configs as in the perf_report for argument ranges
-    sizes = [2 ** i for i in range(7, 11)]  # N values from perf_report
+    sizes = [2 ** i for i in range(7, 14)]  # N values from perf_report
     providers = ["cublas", "triton"]
     group_size = 4
     for provider in providers:
         for N in sizes:
-            for _ in range(2):  # Run a few iterations for each config
+            for _ in range(20):  # Run a few iterations for each config
                 group_A = []
                 group_B = []
                 A_addrs = []

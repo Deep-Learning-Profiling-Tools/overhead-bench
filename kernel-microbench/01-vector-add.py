@@ -73,7 +73,7 @@ def benchmark():
     sizes = [2**i for i in range(12, 28, 1)]
     for size in sizes:
         with proton.scope(f"size_{size}"):
-            for _ in range(10):
+            for _ in range(100):
                 x = torch.rand(size, device='cuda', dtype=torch.float32)
                 y = torch.rand(size, device='cuda', dtype=torch.float32)
                 with proton.scope("triton"):

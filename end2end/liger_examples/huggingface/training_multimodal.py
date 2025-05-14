@@ -1,3 +1,4 @@
+import argparse
 import os
 
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ class CustomArguments:
     max_seq_length: int = 512
     dataset_text_field: str = "texts"
     use_liger: bool = False
+    profile_torch: bool = False
 
 
 def construct_model_and_processor(model_name: str, use_liger: bool) -> torch.nn.Module:
@@ -168,8 +170,18 @@ def train():
         tokenizer=processor.tokenizer,
         # callbacks=[EfficiencyCallback()],
     )
-    with proton.scope("trainer"):
-        trainer.train()
+    if custom_args.profile_torch:
+        import torch.profiler
+        with torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CUDA],
+            record_shapes=True,
+            profile_memory=True,
+        ) as prof:
+            with torch.profiler.record_function("trainer.train"):
+                trainer.train()
+    else:
+        with proton.scope("trainer"):
+            trainer.train()
 
 
 if __name__ == "__main__":

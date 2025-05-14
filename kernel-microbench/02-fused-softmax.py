@@ -190,7 +190,7 @@ def benchmark():
     providers = ['triton', 'torch']
     for N in N_vals:
         with proton.scope(f"N_{N}"):
-            for _ in range(10):
+            for _ in range(100):
                 x = torch.randn(M, N, device='cuda', dtype=torch.float32)
                 for provider in providers:
                     with proton.scope(provider):

@@ -94,7 +94,7 @@ def benchmark():
     p = 0.5
     for size in sizes:
         with torch.cuda.device(0):
-            for _ in range(10):
+            for _ in range(100):
                 x = torch.randn(size, device='cuda', dtype=torch.float32)
                 # Baseline dropout
                 x_keep = (torch.rand(size, device='cuda') > p).to(torch.int32)
