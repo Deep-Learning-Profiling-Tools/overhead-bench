@@ -8,6 +8,7 @@ import transformers
 # from callback import EfficiencyCallback
 from trl import DataCollatorForCompletionOnlyLM
 from trl import SFTTrainer
+import time
 
 from liger_kernel.transformers import AutoLigerKernelForCausalLM
 import triton.profiler as proton
@@ -30,9 +31,8 @@ def train():
     training_args, custom_args = parser.parse_args_into_dataclasses()
     training_args.use_liger_kernel = custom_args.use_liger
     training_args.max_seq_length = custom_args.max_seq_length
-    training_args.max_steps = 100
+    training_args.max_steps = 500
 
-    print(training_args)
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         custom_args.model_name,
         padding_side="left",
@@ -90,11 +90,14 @@ def train():
             profile_memory=True,
         ) as prof:
             with torch.profiler.record_function("trainer.train"):
+                print(f"START_PROFILE: {time.time()}")
                 trainer.train()
+                print(f"END_PROFILE: {time.time()}")
     else:
         with proton.scope("trainer"):
+            print(f"START_PROFILE: {time.time()}")
             trainer.train()
-
+            print(f"END_PROFILE: {time.time()}")
 
 
 if __name__ == "__main__":

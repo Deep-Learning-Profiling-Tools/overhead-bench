@@ -162,7 +162,8 @@ cython_debug/
 #.idea/
 
 
-outputs/
-unsloth_compiled_cache/
+*outputs/
+*unsloth_compiled_cache/
 *.hatchet
 *.nsys-rep
+*trainer_output/

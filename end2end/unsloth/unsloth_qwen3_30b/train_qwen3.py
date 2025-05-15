@@ -58,7 +58,8 @@ def get_training_args(output_dir: str = "./qwen3_30B_finetuned",
                       gradient_accumulation_steps: int = 8,
                       num_train_epochs: int = 3,
                       learning_rate: float = 2e-5,
-                      fp16: bool = True,
+                      fp16: bool = False,
+                      bf16: bool = True,
                       logging_steps: int = 10):
     """
     Create and return HuggingFace TrainingArguments.
@@ -70,6 +71,7 @@ def get_training_args(output_dir: str = "./qwen3_30B_finetuned",
         num_train_epochs=num_train_epochs,
         learning_rate=learning_rate,
         fp16=fp16,
+        bf16=bf16,
         logging_steps=logging_steps,
         # cache_dir="/scratch/jlee436/unsloth/model",
     )
