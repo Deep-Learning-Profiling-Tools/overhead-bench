@@ -17,6 +17,7 @@ declare -a times
 for ((i=1; i<=num_runs; i++)); do
   echo
   echo ">>> Run #$i of $num_runs"
+  sleep 5
 
   # capture output to a temp log
   logfile=$(mktemp /tmp/profile-log.XXXXXX)
