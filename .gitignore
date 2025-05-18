@@ -167,3 +167,4 @@ cython_debug/
 *.hatchet
 *.nsys-rep
 *trainer_output/
+*trace.json

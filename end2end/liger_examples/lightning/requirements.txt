@@ -1,8 +1,0 @@
-lightning
-transformers
-trl
-liger-kernel
-torch
-triton
-deepspeed
-tf-keras
