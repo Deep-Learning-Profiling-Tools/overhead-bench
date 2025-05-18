@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 from unsloth import FastModel
 from datasets import load_dataset
@@ -9,9 +10,9 @@ import triton.profiler as proton
 model_map = {
     "phi-4": "unsloth/Phi-4",
     "gemma-3-4b": "unsloth/gemma-3-4b-it",
-    "Llama-3.1-8B": "unsloth/Llama-3.1-8B",
-    "Llama-3.2-3B": "unsloth/Llama-3.2-3B",
-    "Qwen3-14B": "unsloth/Qwen3-14B",
+    "llama-3.1-8b": "unsloth/Llama-3.1-8B",
+    "llama-3.2-3b": "unsloth/Llama-3.2-3B",
+    "qwen3-14b": "unsloth/Qwen3-14B",
 }
 
 
@@ -83,6 +84,7 @@ def main(profiling_mode, model_name):
         ),
     )
 
+    print(f"START_PROFILE: {time.time()}")
     if profiling_mode == "proton":
         session_id = proton.start(name=f"unsloth_{model_name}", context="shadow")
         trainer.train()
@@ -93,6 +95,8 @@ def main(profiling_mode, model_name):
         prof.export_chrome_trace(f"unsloth_trace_{model_name}.json")
     else:
         trainer.train()
+    print(f"END_PROFILE: {time.time()}")
+
 
 
 if __name__ == "__main__":
@@ -103,4 +107,4 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str)
     args = parser.parse_args()
 
-    main(args.profiling)
+    main(args.profiling, args.model)
