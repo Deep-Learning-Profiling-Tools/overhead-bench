@@ -168,3 +168,4 @@ cython_debug/
 *.nsys-rep
 *trainer_output/
 *trace.json
+*unsloth_trace*.json

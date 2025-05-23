@@ -115,7 +115,7 @@ def main(profiling_mode, model_name):
             per_device_train_batch_size = 2,
             gradient_accumulation_steps = 4,
             warmup_steps = 5,
-            max_steps = 1,  # Change this for longer training
+            max_steps = 30,  # Change this for longer training
             learning_rate = 2e-4,
             logging_steps = 15,
             optim = "adamw_8bit",
