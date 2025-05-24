@@ -1,6 +1,6 @@
 run,script,baseline,proton,torch,nsys
-1,01-vector-add.py,5.48,5.69,5.50,6.14
-2,01-vector-add.py,5.55,5.50,5.50,6.33
-3,01-vector-add.py,5.58,5.90,5.59,5.93
-4,01-vector-add.py,5.62,5.54,5.51,6.17
-5,01-vector-add.py,5.53,5.54,5.97,6.10
+1,01-vector-add.py,7.68,8.15,7.86,8.78
+2,01-vector-add.py,7.44,8.01,8.24,8.35
+3,01-vector-add.py,7.32,7.75,7.83,8.33
+4,01-vector-add.py,7.60,7.86,8.05,8.36
+5,01-vector-add.py,7.53,8.18,7.59,8.14

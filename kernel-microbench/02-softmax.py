@@ -186,18 +186,21 @@ def softmax(x):
 
 def benchmark():
     M = 4096
-    N_vals = [128 * i for i in range(2, 100)]
+    N_vals = [2**i for i in range(8, 16)]
     providers = ['triton', 'torch']
     for N in N_vals:
         with proton.scope(f"N_{N}"):
-            for _ in range(100):
+            for _ in range(1000):
                 x = torch.randn(M, N, device='cuda', dtype=torch.float32)
                 for provider in providers:
                     with proton.scope(provider):
                         if provider == 'torch':
+                            # continue
                             torch.softmax(x, axis=-1)
+                            # pass
                         elif provider == 'triton':
-                            softmax(x)
+                            pass
+                            # softmax(x)
 
 
 def main():

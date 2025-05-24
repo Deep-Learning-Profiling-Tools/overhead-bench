@@ -1,0 +1,11 @@
+
+===== Benchmarking 01-vector-add.py =====
+No Profiling for baseline
+Run 1: 8.64 s
+Run 2: 8.45 s
+Run 3: 8.55 s
+Run 4: 8.79 s
+Run 5: 8.59 s
+
+Profiling with --profiler proton...
+Run 1: 9.26 s

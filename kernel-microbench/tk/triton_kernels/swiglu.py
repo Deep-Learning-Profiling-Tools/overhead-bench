@@ -96,5 +96,3 @@ def swiglu_torch(a, alpha, precision_config):
     out_gelu = a_gelu * torch.sigmoid(alpha * a_gelu)
     out = out_gelu * (a_linear + 1)
     return out
-
-

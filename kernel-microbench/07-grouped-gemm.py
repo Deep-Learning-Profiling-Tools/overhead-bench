@@ -291,7 +291,7 @@ def simple_benchmark():
     group_size = 4
     for provider in providers:
         for N in sizes:
-            for _ in range(20):  # Run a few iterations for each config
+            for _ in range(500):  # Run a few iterations for each config
                 group_A = []
                 group_B = []
                 A_addrs = []
@@ -335,6 +335,8 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 simple_benchmark()
+        with open("grouped_gemm_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"

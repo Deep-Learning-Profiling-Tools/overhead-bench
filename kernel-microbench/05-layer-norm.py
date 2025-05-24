@@ -421,6 +421,9 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 simple_benchmark()
+        # prof.export_chrome_trace("layer_norm_torch.json")
+        with open("layer_norm_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"

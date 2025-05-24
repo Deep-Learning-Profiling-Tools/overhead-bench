@@ -15,7 +15,6 @@ In doing so, you will learn about:
 """
 
 
-import tabulate
 import torch
 
 import triton
@@ -94,7 +93,7 @@ def benchmark():
     p = 0.5
     for size in sizes:
         with torch.cuda.device(0):
-            for _ in range(100):
+            for _ in range(500):
                 x = torch.randn(size, device='cuda', dtype=torch.float32)
                 # Baseline dropout
                 x_keep = (torch.rand(size, device='cuda') > p).to(torch.int32)
@@ -115,6 +114,8 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 benchmark()
+        with open("dropout_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"

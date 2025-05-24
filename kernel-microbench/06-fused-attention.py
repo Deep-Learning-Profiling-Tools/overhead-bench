@@ -663,7 +663,7 @@ def simple_benchmark():
                     H = N_HEADS
                     BATCH_ = BATCH
                     HEAD_DIM_ = HEAD_DIM
-                    for _ in range(5):  # Run a few iterations for each config
+                    for _ in range(20):  # Run a few iterations for each config
                         dtype = torch.float16
                         if "triton" in provider:
                             q = torch.randn((BATCH_, H, N_CTX, HEAD_DIM_), dtype=dtype, device="cuda", requires_grad=True)
@@ -708,7 +708,9 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 simple_benchmark()
-        print(prof.key_averages())
+        # prof.export_chrome_trace("fused_attention_torch.json")
+        with open("fused_attention_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"

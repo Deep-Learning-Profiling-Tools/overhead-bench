@@ -73,7 +73,7 @@ def benchmark():
     sizes = [2**i for i in range(12, 28, 1)]
     for size in sizes:
         with proton.scope(f"size_{size}"):
-            for _ in range(100):
+            for _ in range(500):
                 x = torch.rand(size, device='cuda', dtype=torch.float32)
                 y = torch.rand(size, device='cuda', dtype=torch.float32)
                 with proton.scope("triton"):
@@ -93,6 +93,9 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 benchmark()
+
+        with open("vector_add_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"

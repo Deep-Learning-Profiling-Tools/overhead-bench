@@ -1,6 +1,6 @@
 run,script,baseline,proton,torch,nsys
-1,08-grouped-gemm.py,6.25,5.91,5.91,6.32
-2,08-grouped-gemm.py,5.85,5.92,5.84,6.35
-3,08-grouped-gemm.py,5.87,6.17,5.92,6.68
-4,08-grouped-gemm.py,5.98,5.97,5.91,7.56
-5,08-grouped-gemm.py,5.87,5.89,6.22,6.37
+1,08-grouped-gemm.py,8.82,9.82,9.08,9.17
+2,08-grouped-gemm.py,8.71,8.64,8.75,9.19
+3,08-grouped-gemm.py,8.78,9.10,8.79,9.20
+4,08-grouped-gemm.py,9.85,8.54,8.59,9.01
+5,08-grouped-gemm.py,8.56,8.86,8.70,9.21

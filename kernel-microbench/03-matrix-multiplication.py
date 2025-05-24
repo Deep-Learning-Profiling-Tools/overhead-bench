@@ -362,7 +362,7 @@ def simple_benchmark():
         for provider in providers:
             for size in sizes:
                 M = N = K = size
-                for _ in range(5):  # Run a few iterations for each config
+                for _ in range(20):  # Run a few iterations for each config
                     a = torch.randn((M, K), device='cuda', dtype=torch.float16)
                     b = torch.randn((K, N), device='cuda', dtype=torch.float16)
                     # if TORCH_HAS_FP8 and fp8_inputs:
@@ -385,6 +385,9 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
             with torch.profiler.record_function("benchmark"):
                 simple_benchmark()
+        with open("matmul_torch.json", "w") as f:
+            f.write(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10000).__str__())
+
     elif args.profiler == "proton":
         print("Profiling with proton")
         backend = "cupti_pcsampling" if args.pc_sampling else "cupti"
