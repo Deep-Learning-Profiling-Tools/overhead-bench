@@ -65,7 +65,7 @@ def run(nelems, iters, kernel, workload):
     torch.cuda.synchronize()
 
     end_time = time.time()
-    print("cpu time:", end_time - start_time)
+    print(f"cpu time: {end_time - start_time:.4f}")
 
 
 if __name__ == "__main__":

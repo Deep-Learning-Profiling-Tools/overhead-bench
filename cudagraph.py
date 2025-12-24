@@ -34,10 +34,10 @@ def run(profiling=False, num_iters=100):
         if profiling and i % num_iters == num_iters - 1:
             time0 = time.time()
             proton.deactivate(session)
-            print("deactivate time: ", time.time() - time0)
+            print(f"deactivate time: {time.time() - time0:.4f}")
             time0 = time.time()
             proton.get_data_msgpack(session)
-            print("get_data time: ", time.time() - time0)
+            print(f"get_data time: {time.time() - time0:.4f}")
             proton.clear_data(session)
             proton.activate(session)
 
@@ -45,10 +45,10 @@ def run(profiling=False, num_iters=100):
     end_time = time.time()
 
     if profiling:
-        print("profiling cpu time: ", end_time - start_time)
+        print(f"profiling cpu time: {end_time - start_time:.4f}")
         proton.finalize()
     else:
-        print("pure cpu time: ", end_time - start_time)
+        print(f"pure cpu time: {end_time - start_time:.4f}")
 
 run(profiling=False)
 run(profiling=True)
