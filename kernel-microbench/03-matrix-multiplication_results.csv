@@ -1,0 +1,6 @@
+run,script,baseline,proton,torch,nsys
+1,03-matrix-multiplication.py,12.99,12.52,13.24,14.19
+2,03-matrix-multiplication.py,12.79,12.27,13.66,14.76
+3,03-matrix-multiplication.py,12.52,12.36,13.89,14.50
+4,03-matrix-multiplication.py,12.82,12.90,13.54,14.57
+5,03-matrix-multiplication.py,12.95,12.24,13.40,15.12
