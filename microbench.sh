@@ -21,6 +21,9 @@ do
         else
           cmd="time proton microbench.py --workload $workload --profiler $profiler --kernel $kernel"
         fi
+      elif [ "$profiler" == "none" ];
+      then
+        cmd="time python microbench.py --workload $workload --profiler $profiler --kernel $kernel"
       fi
       echo "$cmd"
       eval "$cmd"
