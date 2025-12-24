@@ -30,13 +30,13 @@ def run(num_iters=100):
 
         if i == num_iters - 1:
             time0 = time.time()
-            proton.deactivate()
+            proton.deactivate(0)
             print(f"deactivate time: {time.time() - time0:.4f}")
             time0 = time.time()
             proton.get_data_msgpack(0)
             print(f"get_data time: {time.time() - time0:.4f}")
             proton.clear_data(0)
-            proton.activate()
+            proton.activate(0)
 
     torch.cuda.synchronize()
     end_time = time.time()
