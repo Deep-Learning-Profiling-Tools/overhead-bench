@@ -13,10 +13,7 @@ def fn(num_scopes=5000):
             z = torch.relu(x @ y) 
 
 
-def run(profiling=False, num_iters=100):
-    if profiling:
-        session = proton.start(f"profile") 
-
+def run(num_iters=100):
     # warmup
     fn()
 
@@ -31,24 +28,19 @@ def run(profiling=False, num_iters=100):
     for i in range(num_iters): 
         g.replay()
 
-        if profiling and i % num_iters == num_iters - 1:
+        if num_iters == num_iters - 1:
             time0 = time.time()
-            proton.deactivate(session)
+            proton.deactivate()
             print(f"deactivate time: {time.time() - time0:.4f}")
             time0 = time.time()
-            proton.get_data_msgpack(session)
+            proton.get_data_msgpack(0)
             print(f"get_data time: {time.time() - time0:.4f}")
-            proton.clear_data(session)
-            proton.activate(session)
+            proton.clear_data(0)
+            proton.activate()
 
     torch.cuda.synchronize()
     end_time = time.time()
 
-    if profiling:
-        print(f"profiling cpu time: {end_time - start_time:.4f}")
-        proton.finalize()
-    else:
-        print(f"pure cpu time: {end_time - start_time:.4f}")
+    print(f"cpu time: {end_time - start_time:.4f}")
 
-run(profiling=False)
-run(profiling=True)
+run()
