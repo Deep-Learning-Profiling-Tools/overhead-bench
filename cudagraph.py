@@ -28,7 +28,7 @@ def run(num_iters=100):
     for i in range(num_iters): 
         g.replay()
 
-        if num_iters == num_iters - 1:
+        if i == num_iters - 1:
             time0 = time.time()
             proton.deactivate()
             print(f"deactivate time: {time.time() - time0:.4f}")
