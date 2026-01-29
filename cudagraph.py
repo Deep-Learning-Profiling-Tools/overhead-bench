@@ -29,7 +29,7 @@ def fn(num_scopes: int) -> None:
             x = torch.randn(512, 512, device=device)
             y = torch.randn(512, 512, device=device)
             z = torch.relu(x @ y)
-            triton_dot[(1,)](x, y, z, 512)
+            triton_dot[(1,)](x, y, z, 64)
 
 
 def run(
