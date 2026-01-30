@@ -9,7 +9,7 @@ import triton.profiler as proton
 
 
 def metadata_fn(grid: tuple, metadata: NamedTuple, args: dict):
-    vec = torch.arange(512, device="cuda")
+    vec = torch.arange(256, device="cuda")
     return {"name": "dot", "flops": 512 * 512 * 2, "vec": vec}
 
 
@@ -22,14 +22,15 @@ def triton_dot(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
     tl.store(c_ptr + offs[:, None] * BLOCK_SIZE + offs[None, :], c)
 
 
-def fn(num_scopes: int) -> None:
+def fn(num_scopes: int, dot_every: int = 1) -> None:
     device = "cuda"
     for i in range(num_scopes):
         with proton.scope(f"scope_{i}"):
             x = torch.randn(512, 512, device=device)
             y = torch.randn(512, 512, device=device)
             z = torch.relu(x @ y)
-            triton_dot[(1,)](x, y, z, 64)
+            if i % dot_every == 0:
+                triton_dot[(1,)](x, y, z, 64)
 
 
 def run(
@@ -38,6 +39,7 @@ def run(
     num_iters: int = 100,
     num_scopes: int = 5000,
     advance_every: int = 10,
+    dot_every: int = 1,
 ) -> None:
     enable_profiling = mode != "none"
     enable_triton_hooks = mode == "profile_triton"
@@ -57,7 +59,7 @@ def run(
     torch.cuda.set_stream(stream)
     g = torch.cuda.CUDAGraph()
     with torch.cuda.graph(g):
-        fn(num_scopes)
+        fn(num_scopes, dot_every=dot_every)
 
     start_time = time.time()
     for i in range(num_iters):
@@ -88,6 +90,7 @@ def main() -> None:
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--scopes", type=int, default=5000)
     parser.add_argument("--advance-every", type=int, default=10)
+    parser.add_argument("--dot-every", type=int, default=1)
     args = parser.parse_args()
 
     run(
@@ -95,6 +98,7 @@ def main() -> None:
         num_iters=args.iters,
         num_scopes=args.scopes,
         advance_every=args.advance_every,
+        dot_every=args.dot_every,
     )
 
 
