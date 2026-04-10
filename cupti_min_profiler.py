@@ -9,12 +9,10 @@ _BUFFER_SIZE = 1 << 20
 _BUFFER_ALIGNMENT = 8
 
 _CUPTI_SUCCESS = 0
-_CUPTI_ACTIVITY_KIND_KERNEL = 3
 _CUPTI_ACTIVITY_KIND_CONCURRENT_KERNEL = 10
 _CUPTI_ACTIVITY_FLAG_FLUSH_FORCED = 1
 
 _KERNEL_ACTIVITY_KINDS = {
-    _CUPTI_ACTIVITY_KIND_KERNEL,
     _CUPTI_ACTIVITY_KIND_CONCURRENT_KERNEL,
 }
 
@@ -237,7 +235,6 @@ def start(name: str, mode=None, hook=None) -> _Session:
             "cuptiActivityRegisterCallbacks",
         )
         for kind in (
-            _CUPTI_ACTIVITY_KIND_KERNEL,
             _CUPTI_ACTIVITY_KIND_CONCURRENT_KERNEL,
         ):
             _check_result(lib, lib.cuptiActivityEnable(kind), f"cuptiActivityEnable({kind})")
