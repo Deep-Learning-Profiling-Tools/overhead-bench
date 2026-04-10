@@ -27,6 +27,7 @@ def triton_dot(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
 
 def fn(
     num_scopes: int,
+    workload_size: int = 1024,
     dot_every: int = 1,
     use_proton_scopes: bool = True,
 ) -> None:
@@ -37,11 +38,11 @@ def fn(
             if use_proton_scopes
             else contextlib.nullcontext()
         ):
-            x = torch.randn(1024, 1024, device=device)
-            y = torch.randn(1024, 1024, device=device)
+            x = torch.randn(workload_size, workload_size, device=device)
+            y = torch.randn(workload_size, workload_size, device=device)
             z = torch.relu(x @ y)
             if i % dot_every == 0:
-                triton_dot[(1,)](x, y, z, 1024)
+                triton_dot[(1,)](x, y, z, workload_size)
 
 
 def run(
@@ -49,6 +50,7 @@ def run(
     mode: str,
     num_iters: int = 100,
     num_scopes: int = 5000,
+    workload_size: int = 1024,
     advance_every: int = 10,
     dot_every: int = 1,
 ) -> None:
@@ -58,7 +60,11 @@ def run(
     use_proton_scopes = not use_cupti_min
 
     # warmup (avoid capturing/profiling compilation)
-    fn(num_scopes, use_proton_scopes=use_proton_scopes)
+    fn(
+        num_scopes,
+        workload_size=workload_size,
+        use_proton_scopes=use_proton_scopes,
+    )
 
     session = None
     if enable_profiling:
@@ -77,6 +83,7 @@ def run(
     with torch.cuda.graph(g):
         fn(
             num_scopes,
+            workload_size=workload_size,
             dot_every=dot_every,
             use_proton_scopes=use_proton_scopes,
         )
@@ -118,6 +125,7 @@ def main() -> None:
     )
     parser.add_argument("--iters", type=int, default=100)
     parser.add_argument("--scopes", type=int, default=5000)
+    parser.add_argument("--workload-size", "--ws", type=int, default=1024)
     parser.add_argument("--advance-every", type=int, default=10)
     parser.add_argument("--dot-every", type=int, default=1)
     args = parser.parse_args()
@@ -126,6 +134,7 @@ def main() -> None:
         mode=args.mode,
         num_iters=args.iters,
         num_scopes=args.scopes,
+        workload_size=args.workload_size,
         advance_every=args.advance_every,
         dot_every=args.dot_every,
     )
