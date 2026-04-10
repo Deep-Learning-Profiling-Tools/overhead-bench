@@ -37,11 +37,11 @@ def fn(
             if use_proton_scopes
             else contextlib.nullcontext()
         ):
-            x = torch.randn(512, 512, device=device)
-            y = torch.randn(512, 512, device=device)
+            x = torch.randn(1024, 1024, device=device)
+            y = torch.randn(1024, 1024, device=device)
             z = torch.relu(x @ y)
             if i % dot_every == 0:
-                triton_dot[(1,)](x, y, z, 64)
+                triton_dot[(1,)](x, y, z, 1024)
 
 
 def run(
