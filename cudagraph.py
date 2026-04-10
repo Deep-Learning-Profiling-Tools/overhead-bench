@@ -1,4 +1,5 @@
 import argparse
+import contextlib
 import time
 from typing import NamedTuple
 
@@ -6,6 +7,8 @@ import torch
 import triton
 import triton.language as tl
 import triton.profiler as proton
+
+import cupti_min_profiler
 
 
 def metadata_fn(grid: tuple, metadata: NamedTuple, args: dict):
@@ -22,10 +25,18 @@ def triton_dot(a_ptr, b_ptr, c_ptr, BLOCK_SIZE: tl.constexpr):
     tl.store(c_ptr + offs[:, None] * BLOCK_SIZE + offs[None, :], c)
 
 
-def fn(num_scopes: int, dot_every: int = 1) -> None:
+def fn(
+    num_scopes: int,
+    dot_every: int = 1,
+    use_proton_scopes: bool = True,
+) -> None:
     device = "cuda"
     for i in range(num_scopes):
-        with proton.scope(f"scope_{i}"):
+        with (
+            proton.scope(f"scope_{i}")
+            if use_proton_scopes
+            else contextlib.nullcontext()
+        ):
             x = torch.randn(512, 512, device=device)
             y = torch.randn(512, 512, device=device)
             z = torch.relu(x @ y)
@@ -43,33 +54,50 @@ def run(
 ) -> None:
     enable_profiling = mode != "none"
     enable_triton_hooks = mode == "profile_triton"
+    use_cupti_min = mode == "cupti_min"
+    use_proton_scopes = not use_cupti_min
 
     # warmup (avoid capturing/profiling compilation)
-    fn(num_scopes)
+    fn(num_scopes, use_proton_scopes=use_proton_scopes)
 
     session = None
     if enable_profiling:
-        start_mode = "periodic_flushing:format=hatchet_msgpack"
-        if enable_triton_hooks:
-            session = proton.start("test", mode=start_mode, hook="triton")
+        if use_cupti_min:
+            session = cupti_min_profiler.start("test")
         else:
-            session = proton.start("test", mode=start_mode)
+            start_mode = "periodic_flushing:format=hatchet_msgpack"
+            if enable_triton_hooks:
+                session = proton.start("test", mode=start_mode, hook="triton")
+            else:
+                session = proton.start("test", mode=start_mode)
 
     stream = torch.cuda.Stream()
     torch.cuda.set_stream(stream)
     g = torch.cuda.CUDAGraph()
     with torch.cuda.graph(g):
-        fn(num_scopes, dot_every=dot_every)
+        fn(
+            num_scopes,
+            dot_every=dot_every,
+            use_proton_scopes=use_proton_scopes,
+        )
 
     start_time = time.time()
     for i in range(num_iters):
         g.replay()
-        if enable_profiling and i != 0 and i % advance_every == 0:
+        if (
+            enable_profiling
+            and not use_cupti_min
+            and i != 0
+            and i % advance_every == 0
+        ):
             proton.data.advance_phase(session)
 
     torch.cuda.synchronize()
     if enable_profiling:
-        proton.finalize()
+        if use_cupti_min:
+            cupti_min_profiler.finalize()
+        else:
+            proton.finalize()
     end_time = time.time()
 
     print(f"cpu time: {end_time - start_time:.4f}")
@@ -79,12 +107,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",
-        choices=["none", "profile", "profile_triton"],
+        choices=["none", "profile", "profile_triton", "cupti_min"],
         default="none",
         help=(
             "1) none: no profile. "
             "2) profile: periodic_flushing. "
-            "3) profile_triton: periodic_flushing + Triton hooks."
+            "3) profile_triton: periodic_flushing + Triton hooks. "
+            "4) cupti_min: kernel-only CUPTI activity consumer."
         ),
     )
     parser.add_argument("--iters", type=int, default=100)
