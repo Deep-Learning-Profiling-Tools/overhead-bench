@@ -42,7 +42,7 @@ def fn(
             y = torch.randn(workload_size, workload_size, device=device)
             z = torch.relu(x @ y)
             if i % dot_every == 0:
-                triton_dot[(1,)](x, y, z, workload_size)
+                triton_dot[(1,)](x, y, z, 64)
 
 
 def run(
